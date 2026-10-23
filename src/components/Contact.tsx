@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, Loader2, Lock } from 'lucide-react';
 
-export const Contact: React.FC = () => {
+interface ContactProps {
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
+}
+
+export const Contact: React.FC<ContactProps> = ({ onOpenPrivacy, onOpenTerms }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     company: '',
     message: '',
+    consent: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,12 +21,19 @@ export const Contact: React.FC = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const { checked } = e.target as HTMLInputElement;
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.consent) return;
+
     setIsSubmitting(true);
 
     // Simulate async submission API call
@@ -28,7 +41,7 @@ export const Contact: React.FC = () => {
 
     setIsSubmitting(false);
     setIsSubmitted(true);
-    setFormData({ name: '', email: '', company: '', message: '' });
+    setFormData({ name: '', email: '', company: '', message: '', consent: false });
 
     // Hide success message after 6 seconds
     setTimeout(() => {
@@ -119,11 +132,55 @@ export const Contact: React.FC = () => {
                 ></textarea>
               </div>
 
+              {/* DPDP Act 2023 Explicit Consent Checkbox (Ticket LC-002) */}
+              <div className="form-group-checkbox">
+                <input
+                  type="checkbox"
+                  id="consent"
+                  name="consent"
+                  required
+                  checked={formData.consent}
+                  onChange={handleChange}
+                  className="legal-checkbox"
+                />
+                <label htmlFor="consent" className="legal-checkbox-label">
+                  I consent to Cruvo Consulting processing my contact details and business inquiry
+                  pursuant to India&apos;s <strong>Digital Personal Data Protection Act, 2023</strong>{' '}
+                  and agree to the{' '}
+                  <button
+                    type="button"
+                    className="legal-inline-link"
+                    onClick={onOpenPrivacy}
+                  >
+                    Privacy Policy
+                  </button>{' '}
+                  and{' '}
+                  <button
+                    type="button"
+                    className="legal-inline-link"
+                    onClick={onOpenTerms}
+                  >
+                    Terms of Service
+                  </button>
+                  .
+                </label>
+              </div>
+
+              {/* Statutory Confidentiality Safeguard (Ticket LC-015) */}
+              <div className="confidentiality-notice">
+                <Lock className="icon-small" />
+                <span>
+                  <strong>Confidentiality Guaranteed:</strong> All financial bottlenecks and operational
+                  records disclosed are treated with strict professional confidentiality under Section 72A
+                  of the IT Act, 2000 and will never be shared with third parties.
+                </span>
+              </div>
+
               <button
                 type="submit"
                 className="cta-button form-submit-btn"
-                disabled={isSubmitting}
-                style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}
+                disabled={isSubmitting || !formData.consent}
+                style={{ width: '100%', padding: '1rem', fontSize: '1rem', marginTop: '1.2rem' }}
               >
                 {isSubmitting ? (
                   <>

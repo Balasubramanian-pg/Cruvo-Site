@@ -36,11 +36,14 @@ export const Results: React.FC = () => {
               <div className="case-metrics-grid">
                 {FEATURED_CASE_STUDY.metrics.map((metric, idx) => (
                   <div key={idx} className="metric-box">
-                    <strong>{metric.value}</strong>
+                    <strong>{metric.value}*</strong>
                     <span>{metric.label}</span>
                   </div>
                 ))}
               </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1.2rem', marginBottom: 0 }}>
+                *Specific turnaround case study. Past operational results are not indicative of guaranteed future financial outcomes.
+              </p>
             </div>
           </Card>
 
